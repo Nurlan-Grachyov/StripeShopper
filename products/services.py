@@ -1,33 +1,31 @@
 import stripe
 from django.http import JsonResponse
-
+from django.shortcuts import get_object_or_404
 
 from config.settings import STRIPE_SECRET_KEY
-
-stripe.api_key = STRIPE_SECRET_KEY
-
-
-def create_price(amount):
-    """Создание цены для объекта"""
-    price = stripe.Price.create(
-        currency="usd",
-        unit_amount=amount * 100,
-        product_data={"name": "tuition fees"},
-    )
-    return price
+from products.models import Item
 
 
-def create_session(price):
-    """Создание сессии оплаты"""
+def buy_item(request, item_id):
+    item = get_object_or_404(Item, pk=item_id)
+
+    stripe.api_key = STRIPE_SECRET_KEY
+
     session = stripe.checkout.Session.create(
-        success_url="http://127.0.0.1:8000/",
-        line_items=[{"price": price.get("id"), "quantity": 1}],
+        payment_method_types=["card"],
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {"name": item.name},
+                    "unit_amount": int(item.price * 100),
+                },
+                "quantity": 1,
+            },
+        ],
         mode="payment",
+        success_url="http://localhost:8000/order-complete/",
+        cancel_url="http://localhost:8000/order-canceled/"
     )
-    return session.get("id"), session.get("url")
 
-
-def test_session(request, session_id):
-    """Просмотр сессии оплаты через идентификатор сессии"""
-    session = stripe.checkout.Session.retrieve(session_id)
-    return JsonResponse({"session": session})
+    return JsonResponse({"session_id": session.id})

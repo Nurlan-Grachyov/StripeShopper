@@ -1,4 +1,4 @@
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 
 from products.models import Item
 from django.http import JsonResponse
@@ -6,6 +6,7 @@ from django.http import JsonResponse
 
 class ItemCreateView(CreateView):
     model = Item
+    fields = ["name", "description", "price", "currency"]
 
     def form_valid(self, form):
         instance = form.save()
@@ -19,3 +20,9 @@ class ItemCreateView(CreateView):
                 'currency': instance.currency
             }
         })
+
+
+class ItemDetailView(DetailView):
+    model = Item
+    template_name = "item_detail.html"
+    context_object_name = "item"

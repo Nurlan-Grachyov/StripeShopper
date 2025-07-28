@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Заказ №{{ order.id }}</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+<h1>Заказ №{{ order.id }}</h1>
+<h2>Товары в заказе:</h2>
+<ul>
+    {% for item in order.items.all %}
+    <li>{{ item.name }} — {{ item.price }} руб.</li>
+    {% endfor %}
+</ul>
+<p>Общая сумма: {{ order.total_price }} руб.</p>
+
+<button id="pay-button">Оплатить заказ</button>
+
+<script type="text/javascript">
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    var payButton = document.getElementById('pay-button');
+
+    payButton.addEventListener('click', function() {
+        // Запрос на создание сессии оплаты для этого заказа
+        fetch('/orders/buy/{{ order.id }}/', {method: 'GET'})
+        .then(response => response.json())
+        .then(session => {
+            if(session.session_id){
+                stripe.redirectToCheckout({ sessionId: session.session_id });
+            } else {
+                alert('Ошибка при создании сессии оплаты.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при попытке оплаты.');
+        });
+    });
+</script>
+</body>
+</html>

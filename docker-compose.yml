@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  web:
+    build: .
+    command: >
+      sh -c 
+      "python manage.py makemigrations && \
+      python manage.py migrate && \
+      python manage.py collectstatic --noinput && \
+      gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - .:/code
+      - static_volume:/app/staticfiles/
+    ports:
+      - "8005:8000"
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
+volumes:
+  static_volume:
+  postgres_data:

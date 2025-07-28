@@ -30,7 +30,7 @@ STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -45,8 +45,7 @@ INSTALLED_APPS = [
     'users',
     'products',
     'discounts_and_taxes',
-    'orders',
-]
+    'orders.apps.OrdersConfig', ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -123,9 +122,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+MEDIA_URL = "/media/"
 
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Настройка CSP (Content Security Policy)
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_SCRIPT_SRC = ("'self'", "https://js.stripe.com/")
+CSP_FONT_SRC = ("'self'",)
+CSP_IMG_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'",)

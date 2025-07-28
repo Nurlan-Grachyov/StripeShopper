@@ -5,6 +5,7 @@ from orders.models import Order
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    filter_horizontal = ('items',)
     list_display = ("get_items_names", "total_price")
 
     def get_items_names(self, obj):
